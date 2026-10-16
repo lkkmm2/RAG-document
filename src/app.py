@@ -8,7 +8,7 @@ st.title("📄 我的 AI 文档问答助手")
 
 # 初始化 API 客户端
 client = OpenAI(
-    api_key="sk-e3dd959dfad247e3ba01494f37101bdf",
+    api_key="",#api
     base_url="https://api.deepseek.com"
 )
 
