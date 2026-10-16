@@ -1,0 +1,16 @@
+# ---------- 数据（不上传） ----------
+data/raw/
+data/processed/
+weights/*.pth
+outputs/
+
+# ---------- Python 缓存 ----------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# ---------- IDE ----------
+.idea/
+.vscode/

@@ -1,0 +1,7 @@
+# 超参数与路径配置示例
+seed: 42
+batch_size: 32
+epochs: 20
+lr: 0.001
+data_dir: data/raw
+output_dir: outputs

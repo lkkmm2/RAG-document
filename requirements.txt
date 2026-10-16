@@ -1,0 +1,6 @@
+# 依赖库列表，例如：
+# torch==2.2.0
+# torchvision==0.17.0
+# numpy
+# pandas
+# pyyaml
