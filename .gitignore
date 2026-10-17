@@ -14,3 +14,6 @@ venv/
 # ---------- IDE ----------
 .idea/
 .vscode/
+# ---------- Chroma 向量库 ----------
+chroma_db/
+src/chroma_db/
