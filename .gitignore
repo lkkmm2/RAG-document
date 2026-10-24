@@ -64,6 +64,16 @@ data/tmp/
 *.log
 install.log
 
+# ============================================================
+# 语料文件默认不进仓库（涉及版权与个人隐私）
+# 仓库只保留 data/docs/sample.md 这一份可公开的示例。
+# 确有需要提交某份文档时：git add -f data/docs/xxx.pdf
+# ============================================================
+data/docs/*.pdf
+data/docs/*.docx
+data/docs/*.doc
+data/samples/*.pdf
+
 # 运行时上传的临时文件
 uploads/
 tmp/

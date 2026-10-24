@@ -11,6 +11,15 @@
   <img alt="license" src="https://img.shields.io/badge/license-MIT-blue">
 </p>
 
+## 界面预览
+
+| 正常问答：编号引用可溯源 | 无答案时拒绝编造 |
+|---|---|
+| ![问答界面](docs/images/qa-answer.png) | ![拒答](docs/images/refusal.png) |
+
+左图：问"申请转专业的条件"，回答里的 `[1][2]` 对应下方引用卡片，可核对到文件名、章节与页码。
+右图：问"学校有几个食堂"，文档里没有，回答明确说"文档中未提及"并解释缺什么，不编。
+
 ---
 
 ## 一、它解决什么问题
@@ -31,8 +40,11 @@
 
 ## 二、实测结果（真实跑出来的，不是编的）
 
-数据集：贵州民族大学《学生手册》272 页 / 15.9 万字 → **874 个子块**（均 178 字）/ **118 个父块**（均 1309 字）。
+数据集：一份 272 页 / 15.9 万字的中文规章手册（学校学生手册）→ **874 个子块**（均 178 字）/ **118 个父块**（均 1309 字）。
 评测集：45 条（40 条可回答 + 5 条无答案），gold chunk 由高区分度关键词自动对齐。
+
+> 语料本身不随仓库分发（第三方文档 + 7.9MB 体积）。换成同类文档，绝对值会有差异，
+> 但**方法学和指标口径不变**；想复现这组数字，把同结构的规章类 PDF 放进 `data/docs/` 重跑即可。
 
 ```bash
 python scripts/eval.py --presets vector_only,bm25_only,hybrid,hybrid_rerank
@@ -144,6 +156,8 @@ copy .env.example .env
 #   编辑 .env：DOCQA_LLM__API_KEY=sk-xxxx
 
 # 3) 入库（首次会从 ModelScope 下载 bge 模型，约 95MB）
+#    仓库自带一份示例语料 data/docs/sample.md，clone 下来就能跑；
+#    换成你自己的 PDF：把文件放进 data/docs/ 即可（PDF 默认被 gitignore，不会误提交）
 python -m docqa.cli
 
 # 4) 启动
@@ -189,12 +203,17 @@ src/docqa/
 ├── retrieval/   pipeline(编排) fusion(RRF/MMR) rerank(Cross-Encoder) query_rewrite
 ├── rag/         prompts(Prompt+引用校验) answerer(问答+流式)
 ├── agent/       react(ReAct循环) tools(4个工具+安全计算器)
-├── api/         main(中间件/异常/限流) routes(10个接口)
+├── api/         main(中间件/异常/限流) routes(12个接口)
 └── eval/        evaluator(recall/MRR/引用/拒答)
 apps/web/app.py  Streamlit 前端        scripts/  入库·评测·演示·冒烟
 tests/           45 个测试             legacy/   v1 旧代码归档（演进对照）
-docs/            学习手册 · 面试问答 · 演示指南
+docs/            学习手册 · 面试问答 · 演示指南 · images(界面截图)
+data/docs/       语料目录（自带 sample.md 示例；PDF 默认 gitignore）
+data/eval/       45 条评测集 + compare / demo 报告
 ```
+
+> 接口共 **12 个**：`/health` `/config` `/metrics` `/documents` `/stats` `/documents/upload`
+> `/documents/{id}` `/search` `/ask` `/ask/stream` `/agent` `/eval/cases`（上面表格按功能合并了同类项）。
 
 ---
 
@@ -217,7 +236,7 @@ docs/            学习手册 · 面试问答 · 演示指南
 ## 九、已知限制
 
 - 单机、单文档 874 块规模；没做过万级/多租户验证。
-- 不做 OCR：扫描件只检测告警（`data/samples/t1.pdf` 就是例子）。
+- 不做 OCR：扫描件只做检测告警（平均每页 < 30 字会 warning），不转文字。
 - 评测集 45 条，只能看方向性变化，看不了统计显著性；缺"同义改写/口语化提问"样本，
   所以混合检索相对单路 BM25 的优势在这份集子上体现不出来（见 2.3 第 2 条）。
 - 已发现 1 条标注偏严（q42），已在评测集 `note` 里记录，未重跑；重标后拒答率应为 100%。
