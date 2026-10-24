@@ -207,7 +207,7 @@ src/docqa/
 └── eval/        evaluator(recall/MRR/引用/拒答)
 apps/web/app.py  Streamlit 前端        scripts/  入库·评测·演示·冒烟
 tests/           45 个测试             legacy/   v1 旧代码归档（演进对照）
-docs/            学习手册 · 面试问答 · 演示指南 · images(界面截图)
+docs/            学习手册 · 演示指南 · images(界面截图)
 data/docs/       语料目录（自带 sample.md 示例；PDF 默认 gitignore）
 data/eval/       45 条评测集 + compare / demo 报告
 ```
@@ -251,7 +251,6 @@ data/eval/       45 条评测集 + compare / demo 报告
 | 文档 | 内容 |
 |---|---|
 | [docs/项目学习手册.md](docs/项目学习手册.md) | 架构、逐层设计、数据流、配置速查、排错、扩展 |
-| [docs/面试问答.md](docs/面试问答.md) | 57 个高频追问 + 回答框架（含"别说什么"） |
 | [docs/演示指南.md](docs/演示指南.md) | 5 分钟演示脚本、常见提问应对 |
 
 ---
