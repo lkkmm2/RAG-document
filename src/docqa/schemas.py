@@ -218,6 +218,8 @@ class EvalCase(BaseModel):
     gold_chunk_ids: list[str] = Field(default_factory=list)
     gold_sections: list[str] = Field(default_factory=list)
     type: Literal["single_hop", "multi_hop", "table", "unanswerable"] = "single_hop"
+    # 标注备注：记录"这条为什么这么标""哪里可能标偏了"，让评测集自带上下文
+    note: str = ""
 
 
 class EvalRow(BaseModel):
@@ -237,6 +239,7 @@ class EvalRow(BaseModel):
 class EvalReport(BaseModel):
     name: str = ""
     cases: int = 0
+    cases_answerable: int = 0
     recall_at_k: float = 0.0
     recall_by_k: dict[int, float] = Field(default_factory=dict)
     mrr: float = 0.0

@@ -39,7 +39,7 @@
 {"id":"q39","question":"毕业生找工作需要什么推荐材料？","answerable":true,"type":"single_hop","gold_answer":"需如实填写毕业生就业推荐表，学习成绩由学院和教务处审核盖章。","gold_keywords":["毕业生就业推荐表"]}
 {"id":"q40","question":"毕业生离校时拿到的报到证是谁签发的？","answerable":true,"type":"single_hop","gold_answer":"经贵州省普通高等学校毕业生就业工作办公室审核后签发报到证。","gold_keywords":["签发报到证"]}
 {"id":"q41","question":"学校快递站在哪里？学生怎么寄快递？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及快递站相关信息。","gold_keywords":[]}
-{"id":"q42","question":"宿舍空调坏了应该找谁维修？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及空调维修流程。","gold_keywords":[]}
+{"id":"q42","question":"宿舍空调坏了应该找谁维修？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及空调维修流程。","gold_keywords":[],"note":"标注偏严：实测 rerank 档检索到「房间内电器或电路发生故障须报告宿舍管理员，由后勤集团派电工检修」，模型据此作答且引用正确。这条按'无法回答'算会低估拒答率，下一版应改标为可回答或把问题改成'空调保修期几年'。"}
 {"id":"q43","question":"图书馆一次最多可以借几本书？借期多少天？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及图书借阅册数和借期。","gold_keywords":[]}
 {"id":"q44","question":"食堂支持微信和支付宝支付吗？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及食堂支付方式。","gold_keywords":[]}
 {"id":"q45","question":"校园卡的初始密码是多少？丢了怎么挂失？","answerable":false,"type":"unanswerable","gold_answer":"文档中未提及校园卡密码与挂失流程。","gold_keywords":[]}

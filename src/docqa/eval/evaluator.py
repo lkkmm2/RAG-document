@@ -168,9 +168,12 @@ def _aggregate(rows: list[EvalRow], cases: list[EvalCase], name: str) -> EvalRep
     ok = [r for r in rows if not r.error]
     latencies = [r.latency_ms for r in ok if r.latency_ms > 0]
     case_map = {c.id: c for c in cases}
-    refusals = [
-        r for r in ok if not case_map.get(r.id, EvalCase(id="", question="")).answerable
-    ]
+
+    # 关键：召回类指标只在「可回答」的用例上平均。
+    # 无答案题没有 gold chunk，把它算进分母会让 recall 凭空掉 11%（5/45），
+    # 这是很多人做 RAG 评测时无意识引入的偏差。
+    answerable = [r for r in ok if case_map.get(r.id) and case_map[r.id].answerable]
+    refusals = [r for r in ok if case_map.get(r.id) and not case_map[r.id].answerable]
 
     def mean(values: list[float]) -> float:
         return round(statistics.fmean(values), 4) if values else 0.0
@@ -178,13 +181,14 @@ def _aggregate(rows: list[EvalRow], cases: list[EvalCase], name: str) -> EvalRep
     return EvalReport(
         name=name,
         cases=len(rows),
-        recall_at_k=mean([r.recall for r in ok]),
+        cases_answerable=len(answerable),
+        recall_at_k=mean([r.recall for r in answerable]),
         recall_by_k={
-            k: mean([r.recall_by_k.get(k, 0.0) for r in ok]) for k in RECALL_CUTOFFS
+            k: mean([r.recall_by_k.get(k, 0.0) for r in answerable]) for k in RECALL_CUTOFFS
         },
-        mrr=mean([r.reciprocal_rank for r in ok]),
-        keyword_hit=mean([r.keyword_hit for r in ok if r.answer]),
-        citation_precision=mean([r.citation_precision for r in ok if r.answer]),
+        mrr=mean([r.reciprocal_rank for r in answerable]),
+        keyword_hit=mean([r.keyword_hit for r in answerable if r.answer]),
+        citation_precision=mean([r.citation_precision for r in answerable if r.answer]),
         refusal_accuracy=mean(
             [1.0 if "未提及" in r.answer else 0.0 for r in refusals if r.answer]
         ),
@@ -207,7 +211,7 @@ def render_markdown(report: EvalReport) -> str:
     lines = [
         f"# 评测报告：{report.name}",
         "",
-        f"- 用例数：{report.cases}",
+        f"- 用例数：{report.cases}（可回答 {report.cases_answerable}）",
         f"- recall@{report.config.get('top_k', 'k')}：**{report.recall_at_k:.4f}**",
         "- 各截断点召回："
         + " · ".join(f"@{k}={v:.4f}" for k, v in sorted(report.recall_by_k.items())),
