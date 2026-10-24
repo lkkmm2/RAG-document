@@ -1,7 +1,93 @@
-# 超参数与路径配置示例
-seed: 42
-batch_size: 32
-epochs: 20
-lr: 0.001
-data_dir: data/raw
-output_dir: outputs
+# ============================================================================
+# DocQA 运行配置
+#
+# 优先级：显式传参 > DOCQA_* 环境变量 > .env > 本文件 > 代码默认值
+# 需要临时改参数又不想动文件时：
+#   DOCQA_RETRIEVAL__FINAL_TOP_K=6 DOCQA_RERANK__ENABLED=false uvicorn ...
+# ============================================================================
+
+app_name: "DocQA · RAG 文档问答"
+app_version: "2.0.0"
+docs_dir: "data/docs"
+
+llm:
+  provider: deepseek            # deepseek | mock（无 Key 时自动降级为 mock）
+  model: deepseek-chat
+  base_url: "https://api.deepseek.com"
+  temperature: 0.1
+  max_tokens: 1200
+  timeout_s: 60
+  aux_model: ""
+
+embedding:
+  provider: local               # local | hashing（hashing 只用于测试/离线）
+  model_name: "BAAI/bge-small-zh-v1.5"
+  model_dir: "data/models"
+  device: cpu
+  batch_size: 32
+  normalize: true
+  # bge 官方建议：query 加指令、passage 不加
+  query_instruction: "为这个句子生成表示以用于检索相关文章："
+  local_files_only: false
+
+rerank:
+  enabled: true                 # 关掉可用来看"精排到底贡献了多少"
+  provider: cross_encoder       # cross_encoder | none
+  model_name: "BAAI/bge-reranker-base"
+  model_dir: "data/models"
+  batch_size: 8
+  # 子块只有 178 字，256 足够覆盖 query+passage；512 会白白多算一倍显存/时间
+  max_length: 256
+
+chunking:
+  chunk_size: 400               # 子块：被检索
+  chunk_overlap: 80
+  parent_size: 1200             # 父块：被喂给模型
+  min_chars: 40
+  separators: ["\n\n", "\n", "。", "！", "？", "；", "，", " ", ""]
+
+ingest:
+  max_pages: 400
+  extract_tables: false         # 开启后 pdfplumber 会显著变慢，按需开
+  dedupe_header_footer: true
+  header_footer_ratio: 0.6
+
+retrieval:
+  enable_vector: true
+  enable_bm25: true
+  vector_top_k: 20
+  bm25_top_k: 20
+  candidate_top_k: 20
+  final_top_k: 4
+  fusion: rrf                   # rrf | weighted
+  rrf_k: 60
+  vector_weight: 0.6
+  bm25_weight: 0.4
+  mmr_lambda: 1.0               # <1 开启 MMR 去冗余
+  max_context_chars: 4000
+  rewrite_query: true
+  rewrite_history_turns: 4
+
+store:
+  index_dir: "data/index"
+  collection: docqa_chunks
+  space: cosine
+
+agent:
+  max_steps: 5
+  max_tool_calls: 8
+  no_progress_threshold: 2
+  temperature: 0.0
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_origins: ["*"]
+  rate_limit_per_min: 120
+  max_upload_mb: 40
+  log_format: text              # text | json
+  log_level: INFO
+
+eval:
+  qa_path: "data/eval/qa_set.jsonl"
+  report_dir: "data/eval/reports"

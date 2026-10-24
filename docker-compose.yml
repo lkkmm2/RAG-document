@@ -1,0 +1,41 @@
+# 一条命令起完整服务：docker compose up --build
+# 镜像较大（含 torch），首次构建 5-10 分钟属正常
+
+services:
+  api:
+    build: .
+    image: docqa-api:2.0.0
+    container_name: docqa-api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      DOCQA_API__HOST: 0.0.0.0
+      DOCQA_API__PORT: 8000
+      DOCQA_STORE__INDEX_DIR: /app/data/index
+      DOCQA_DOCS_DIR: /app/data/docs
+    volumes:
+      - ./data:/app/data          # 索引、原始文档、模型缓存都落在这里
+      - ./configs:/app/configs:ro
+    restart: unless-stopped
+
+  web:
+    image: docqa-api:2.0.0
+    container_name: docqa-web
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    environment:
+      DOCQA_API_URL: http://api:8000
+    command:
+      - streamlit
+      - run
+      - apps/web/app.py
+      - --server.port=8501
+      - --server.address=0.0.0.0
+      - --server.headless=true
+    volumes:
+      - ./apps:/app/apps:ro
+    restart: unless-stopped

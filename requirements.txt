@@ -1,4 +1,6 @@
-streamlit
-openai
-chromadb
-pypdf
+# 依赖统一在 pyproject.toml 中定义（含 dev / cn 两个可选组）。
+# 这个文件只是为了兼容习惯：pip install -r requirements.txt
+#
+# 等价于：
+#   pip install -e ".[dev,cn]" -i https://pypi.tuna.tsinghua.edu.cn/simple
+-e .[dev,cn]
